@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Church Event Registration</title>
+  <title>HKECC Attendance Form</title>
   <style>
     body { font-family: Arial, sans-serif; margin: 16px; max-width: 800px; }
     .row { margin-bottom: 12px; }
@@ -17,10 +17,28 @@
     .btn-secondary { background: #fff; border: 1px solid #333; }
     .btn-primary { background: #111; color: #fff; border: 1px solid #111; }
     .actions { display: flex; gap: 8px; flex-wrap: wrap; }
+    .name-list {
+      max-height: 320px;     /* adjust height as you like */
+      overflow-y: auto;      /* enable vertical scroll */
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      padding: 6px;
+    }
+    /* Optional: nicer scrollbar (works in most browsers) */
+    .name-list::-webkit-scrollbar {
+      width: 8px;
+    }
+    .name-list::-webkit-scrollbar-thumb {
+      background: #bbb;
+      border-radius: 4px;
+    }
+    .name-list::-webkit-scrollbar-thumb:hover {
+      background: #999;
+    }
   </style>
 </head>
 <body>
-  <h1>Church Event Registration</h1>
+  <h1>HKECC Attendance Form</h1>
 
   {% with messages = get_flashed_messages() %}
     {% if messages %}
@@ -37,7 +55,7 @@
 
       <div class="row">
         <label>Event date:</label><br/>
-        <input type="date" name="event_date" required />
+        <input type="date" name="event_date" id="event_date" required />
       </div>
 
       <div class="row">
@@ -48,7 +66,7 @@
 
       <input type="hidden" name="full_names" id="full_names" />
 
-      <ul id="nameList">
+      <ul id="nameList" class="name-list">
         {% for p in people %}
           <li data-name="{{ p.full_name|e }}">
             {{ p.full_name }} <span class="small">({{ p.sex }})</span>
@@ -66,9 +84,10 @@
   <div class="card" id="addCard" style="display:none;">
     <h2 style="margin-top:0;">Add New Person</h2>
     <form method="POST" action="/add_person" id="addPersonForm">
+      <input type="hidden" name="event_date" id="add_event_date">
       <div class="row">
         <label>Full name:</label><br/>
-        <input type="text" name="new_full_name" id="new_full_name" placeholder="e.g., Juan Dela Cruz" required />
+        <input type="text" name="new_full_name" id="new_full_name" placeholder="e.g., Joseph Lee" required />
       </div>
       <div class="row">
         <label>Sex:</label><br/>
@@ -95,6 +114,30 @@
     const addCard = document.getElementById("addCard");
     const cancelAdd = document.getElementById("cancelAdd");
     const newFullName = document.getElementById("new_full_name");
+    const eventDateInput = document.getElementById("event_date");
+    const addEventDateInput = document.getElementById("add_event_date");
+
+    // ✅ Set default event date to today
+    if (eventDateInput && !eventDateInput.value) {
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, "0");
+    const dd = String(today.getDate()).padStart(2, "0");
+    eventDateInput.value = `${yyyy}-${mm}-${dd}`;
+    }
+
+    // keep add-person date in sync
+    if (eventDateInput && addEventDateInput) {
+    const syncDate = () => {
+        addEventDateInput.value = eventDateInput.value;
+    };
+
+    // initialize
+    syncDate();
+
+    // update on change
+    eventDateInput.addEventListener("change", syncDate);
+    }
 
     // 🔹 Store selected names
     const selectedNames = new Set();

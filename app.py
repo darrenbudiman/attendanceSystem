@@ -131,6 +131,7 @@ def submit():
 def add_person():
     full_name = request.form.get("new_full_name", "")
     sex = request.form.get("sex", "")
+    event_date = request.form.get("event_date", "").strip()
 
     new_name = normalize_name(full_name)
 
@@ -139,8 +140,14 @@ def add_person():
         return redirect(url_for("index"))
 
     added = add_person_to_people_csv(new_name, sex)
+
     if added:
-        flash(f"Added new person: {new_name} ({sex})")
+        # ✅ Mark attendance immediately if date exists
+        if event_date:
+            append_attendance(event_date, new_name)
+            flash(f"Added & recorded attendance: {new_name}")
+        else:
+            flash(f"Added new person: {new_name}")
     else:
         flash("Person already exists or invalid sex.")
 
