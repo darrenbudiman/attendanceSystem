@@ -1,4 +1,10 @@
+"""
+Requirements
+    - pip install openpyxl, flask
+"""
+
 from flask import Flask, render_template, request, redirect, url_for, flash
+from openpyxl import Workbook, load_workbook
 import csv
 import os
 from datetime import datetime
@@ -7,7 +13,7 @@ app = Flask(__name__)
 app.secret_key = "local-dev-key"
 
 PEOPLE_CSV = "people.csv"
-ATTENDANCE_CSV = "attendance.csv"
+ATTENDANCE_XLSX = "attendance.xlsx"
 
 
 def ensure_people_csv_exists():
@@ -30,22 +36,33 @@ def load_people():
     people.sort(key=lambda s: s.lower())
     return people
 
+def ensure_attendance_excel_exists():
+    """
+    Create attendance.xlsx if it doesn't exist.
+    Data is stored ONLY in the first sheet.
+    """
+    if not os.path.exists(ATTENDANCE_XLSX):
+        wb = Workbook()
+        ws = wb.active
+        ws.title = "Attendance"   # First sheet
+        ws.append(["event_date", "full_name", "timestamp"])
+        wb.save(ATTENDANCE_XLSX)
+
 
 def append_attendance(event_date, full_name):
-    file_exists = os.path.exists(ATTENDANCE_CSV)
+    ensure_attendance_excel_exists()
 
-    with open(ATTENDANCE_CSV, "a", newline="", encoding="utf-8") as f:
-        fieldnames = ["event_date", "full_name", "timestamp"]
-        writer = csv.DictWriter(f, fieldnames=fieldnames)
+    wb = load_workbook(ATTENDANCE_XLSX)
+    ws = wb.worksheets[0]  # FIRST sheet only
 
-        if not file_exists:
-            writer.writeheader()
+    ws.append([
+        event_date,
+        full_name,
+        datetime.now().isoformat(timespec="seconds")
+    ])
 
-        writer.writerow({
-            "event_date": event_date,
-            "full_name": full_name,
-            "timestamp": datetime.now().isoformat(timespec="seconds"),
-        })
+    wb.save(ATTENDANCE_XLSX)
+
 
 
 def normalize_name(name: str) -> str:
