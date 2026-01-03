@@ -46,11 +46,13 @@
         <div class="small">Click a name below to select.</div>
       </div>
 
-      <input type="hidden" name="full_name" id="full_name" required />
+      <input type="hidden" name="full_names" id="full_names" />
 
       <ul id="nameList">
-        {% for name in people %}
-          <li data-name="{{ name|e }}">{{ name }}</li>
+        {% for p in people %}
+          <li data-name="{{ p.full_name|e }}">
+            {{ p.full_name }} <span class="small">({{ p.sex }})</span>
+          </li>
         {% endfor %}
       </ul>
 
@@ -68,6 +70,15 @@
         <label>Full name:</label><br/>
         <input type="text" name="new_full_name" id="new_full_name" placeholder="e.g., Juan Dela Cruz" required />
       </div>
+      <div class="row">
+        <label>Sex:</label><br/>
+        <select name="sex" required>
+            <option value="">Select</option>
+            <option value="M">Male</option>
+            <option value="F">Female</option>
+        </select>
+      </div>
+
       <div class="actions">
         <button class="btn-primary" type="submit">Save to People List</button>
         <button class="btn-secondary" type="button" id="cancelAdd">Cancel</button>
@@ -79,27 +90,38 @@
   <script>
     const search = document.getElementById("search");
     const list = document.getElementById("nameList");
-    const hidden = document.getElementById("full_name");
+    const hidden = document.getElementById("full_names");
     const toggleAdd = document.getElementById("toggleAdd");
     const addCard = document.getElementById("addCard");
     const cancelAdd = document.getElementById("cancelAdd");
     const newFullName = document.getElementById("new_full_name");
 
-    let selectedLi = null;
+    // 🔹 Store selected names
+    const selectedNames = new Set();
 
-    function selectLi(li) {
-      if (selectedLi) selectedLi.classList.remove("selected");
-      selectedLi = li;
-      selectedLi.classList.add("selected");
-      hidden.value = li.dataset.name;
+    function syncHidden() {
+      hidden.value = Array.from(selectedNames).join(",");
     }
 
+    // 🔹 MULTI-SELECT toggle
     list.addEventListener("click", (e) => {
       const li = e.target.closest("li");
       if (!li) return;
-      selectLi(li);
+
+      const name = li.dataset.name;
+
+      if (selectedNames.has(name)) {
+        selectedNames.delete(name);
+        li.classList.remove("selected");
+      } else {
+        selectedNames.add(name);
+        li.classList.add("selected");
+      }
+
+      syncHidden();
     });
 
+    // 🔹 Search filter (unchanged)
     search.addEventListener("input", () => {
       const q = search.value.toLowerCase().trim();
       for (const li of list.querySelectorAll("li")) {
@@ -108,10 +130,11 @@
       }
     });
 
+    // 🔹 Prevent submit if nothing selected
     document.getElementById("attendanceForm").addEventListener("submit", (e) => {
       if (!hidden.value) {
         e.preventDefault();
-        alert("Please click your name first.");
+        alert("Please select at least one name.");
       }
     });
 
@@ -126,5 +149,6 @@
       addCard.style.display = "none";
     });
   </script>
+
 </body>
 </html>
