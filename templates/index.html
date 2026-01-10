@@ -5,40 +5,157 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>HKECC Attendance Form</title>
   <style>
-    body { font-family: Arial, sans-serif; margin: 16px; max-width: 800px; }
-    .row { margin-bottom: 12px; }
-    input, button { padding: 8px; font-size: 16px; }
-    ul { list-style: none; padding: 0; }
-    li { padding: 10px; border: 1px solid #ddd; margin-bottom: 6px; cursor: pointer; border-radius: 6px; }
-    li.selected { background: #eef6ff; border-color: #7ab8ff; }
-    .msg { padding: 10px; background: #f4f4f4; border-radius: 6px; margin-bottom: 12px; }
-    .small { color: #555; font-size: 14px; }
-    .card { border: 1px solid #ddd; border-radius: 8px; padding: 12px; margin: 12px 0; }
-    .btn-secondary { background: #fff; border: 1px solid #333; }
-    .btn-primary { background: #111; color: #fff; border: 1px solid #111; }
-    .actions { display: flex; gap: 8px; flex-wrap: wrap; }
+    :root {
+        --primary: #2f5d62;     /* calm teal */
+        --primary-light: #e6f0f1;
+        --border: #ddd;
+        --text: #222;
+        --muted: #666;
+        --bg: #fafafa;
+    }
+
+    body {
+        font-family: "Segoe UI", Arial, sans-serif;
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+    }
+
+    .container {
+        max-width: 820px;
+        margin: 24px auto;
+        padding: 0 16px;
+    }
+
+    h1 {
+        text-align: center;
+        margin-bottom: 6px;
+        color: var(--primary);
+    }
+
+    .subtitle {
+        text-align: center;
+        color: var(--muted);
+        margin-bottom: 20px;
+    }
+
+    .card {
+        background: #fff;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 16px;
+        margin-bottom: 18px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+    }
+
+    .row {
+        margin-bottom: 14px;
+    }
+
+    label {
+        font-weight: 600;
+        margin-bottom: 4px;
+        display: block;
+    }
+
+    input[type="text"],
+    input[type="date"],
+    select {
+        width: 100%;
+        padding: 10px;
+        font-size: 16px;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+    }
+
+    input:focus, select:focus {
+        outline: none;
+        border-color: var(--primary);
+    }
+
+    .small {
+        font-size: 14px;
+        color: var(--muted);
+    }
+
+    ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
     .name-list {
-      max-height: 320px;     /* adjust height as you like */
-      overflow-y: auto;      /* enable vertical scroll */
-      border: 1px solid #ddd;
-      border-radius: 6px;
-      padding: 6px;
+        max-height: 320px;
+        overflow-y: auto;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 8px;
+        background: #fff;
     }
-    /* Optional: nicer scrollbar (works in most browsers) */
-    .name-list::-webkit-scrollbar {
-      width: 8px;
+
+    li {
+        padding: 12px 10px;
+        border: 1px solid var(--border);
+        margin-bottom: 8px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background 0.2s, border 0.2s;
     }
-    .name-list::-webkit-scrollbar-thumb {
-      background: #bbb;
-      border-radius: 4px;
+
+    li:hover {
+        background: #f4f8f9;
     }
-    .name-list::-webkit-scrollbar-thumb:hover {
-      background: #999;
+
+    li.selected {
+        background: var(--primary-light);
+        border-color: var(--primary);
     }
-  </style>
+
+    .actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 12px;
+        flex-wrap: wrap;
+    }
+
+    button {
+        padding: 10px 18px;
+        font-size: 16px;
+        border-radius: 10px;
+        cursor: pointer;
+    }
+
+    .btn-primary {
+        background: var(--primary);
+        color: #fff;
+        border: none;
+    }
+
+    .btn-primary:hover {
+        opacity: 0.9;
+    }
+
+    .btn-secondary {
+        background: #fff;
+        border: 1px solid var(--primary);
+        color: var(--primary);
+    }
+
+    .msg {
+        background: #eef5f6;
+        border-left: 4px solid var(--primary);
+        padding: 12px;
+        border-radius: 8px;
+        margin-bottom: 16px;
+        }
+    </style>
+
+
 </head>
 <body>
-  <h1>HKECC Attendance Form</h1>
+  <div class="container">
+    <h1>HKECC Attendance Form</h1>
+    <div class="subtitle">Attendance Marking</div>
 
   {% with messages = get_flashed_messages() %}
     {% if messages %}
@@ -193,5 +310,6 @@
     });
   </script>
 
+  </div>
 </body>
 </html>
