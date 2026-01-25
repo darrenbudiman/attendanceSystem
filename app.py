@@ -7,6 +7,7 @@ from flask import Flask, render_template, request, redirect, url_for, flash
 from openpyxl import Workbook, load_workbook
 import os
 from datetime import datetime
+from flask import jsonify
 
 app = Flask(__name__)
 app.secret_key = "local-dev-key"
@@ -174,10 +175,16 @@ def submit():
 
     names = [normalize_name(n) for n in names_raw.split(",") if normalize_name(n)]
 
-    for full_name in names:
-        append_attendance(event_date, full_name)
+    present = get_attendance_names_for_date(event_date)
 
-    flash(f"Recorded attendance for {len(names)} people.")
+    added_count = 0
+    for full_name in names:
+        if full_name.lower() in present:
+            continue
+        append_attendance(event_date, full_name)
+        added_count += 1
+
+    flash(f"Recorded attendance for {added_count} people. (Ignored duplicates: {len(names)-added_count})")
     return redirect(url_for("index"))
 
 
@@ -206,6 +213,29 @@ def add_person():
         flash("Person already exists or invalid sex.")
 
     return redirect(url_for("index"))
+
+def get_attendance_names_for_date(event_date: str) -> set[str]:
+    ensure_workbook_exists()
+    wb = load_workbook(ATTENDANCE_XLSX, data_only=True)
+    ws = wb[ATTENDANCE_SHEET]
+
+    present = set()
+    for row in ws.iter_rows(min_row=2, values_only=True):
+        d = (row[0] or "")
+        name = normalize_name(row[1] or "")
+        if d == event_date and name:
+            present.add(name.lower())
+    return present
+
+
+@app.get("/attendance_status")
+def attendance_status():
+    event_date = (request.args.get("event_date") or "").strip()
+    if not event_date:
+        return jsonify({"event_date": "", "present": []})
+
+    present = sorted(list(get_attendance_names_for_date(event_date)))
+    return jsonify({"event_date": event_date, "present": present})
 
 
 if __name__ == "__main__":
